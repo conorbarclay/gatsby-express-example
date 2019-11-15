@@ -20,17 +20,26 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          name: Restore Yarn Package Cache
+          name: Restore Yarn Package Caches
           keys:
+            - yarn-packages-{{ checksum "./yarn.lock" }}
             - yarn-packages-{{ checksum "./client/yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: yarn install && cd client && yarn install && npm rebuild
+          command: |
+            yarn install
+            cd ./client
+            yarn install
       - save_cache:
-          name: Save Yarn Package Cache
+          name: Save Yarn Package Caches - Server
+          key: yarn-packages-{{ checksum "./yarn.lock" }}
+          paths:
+            - ~/.cache/yarn/server
+      - save_cache:
+          name: Save Yarn Package Caches - Gatsby
           key: yarn-packages-{{ checksum "./client/yarn.lock" }}
           paths:
-            - ~/.cache/yarn
+            - ~/.cache/yarn/gatsby
       - restore_cache:
           name: Restore Gatsby Public Cache
           keys:
@@ -48,7 +57,7 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install rsync
             ssh-keyscan citadelmedia.xyz >> ~/.ssh/known_hosts
-            rsync -chavzP --delete ./client/public/ serverpilot@citadelmedia.xyz:apps/gatsby/public/
+            rsync -chavzP ./index.js ./client/public/ serverpilot@citadelmedia.xyz:apps/gatsby/public/
             ssh serverpilot@citadelmedia.xyz << EOF
               /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 stop gatsby
               /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 start ./apps/gatsby/public/index.js --name="gatsby"
