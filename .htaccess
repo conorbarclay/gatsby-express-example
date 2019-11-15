@@ -1,2 +1,4 @@
 RewriteRule index.html http://localhost:5000/ [P]
 RewriteRule (.*) http://localhost:5000/$1 [P]
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=302,L]
