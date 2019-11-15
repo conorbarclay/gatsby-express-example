@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 
 // Serve the static files from the Gatsby app
-app.use('/', express.static(__dirname + '/'));
+app.use(express.static(path.join(__dirname, "client/public/")));
 
 // An api endpoint that returns a short list of items
 app.get("/api/items", (req, res) => {
@@ -18,7 +18,7 @@ app.listen(port);
 
 // Handles any requests that don't match the ones above
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname + "/404.html"));
+  res.sendFile(path.join(__dirname + "/client/public/404.html"));
 });
 
 console.log("App is listening on port " + port);
