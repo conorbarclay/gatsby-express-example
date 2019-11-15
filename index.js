@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 
 // Serve the static files from the Gatsby app
-app.use(express.static(path.join(__dirname, "/")));
+app.use('/', express.static(__dirname + '/'));
 
 // An api endpoint that returns a short list of items
 app.get("/api/items", (req, res) => {
