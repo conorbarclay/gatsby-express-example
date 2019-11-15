@@ -1,0 +1,55 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:10
+
+version: 2
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - deploy-staging:
+          filters:
+            branches:
+              only:
+                - develop
+jobs:
+  deploy-staging:
+    <<: *defaults
+    environment:
+      working_directory: ~/gatsby-express-example
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "./client/yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: yarn install && cd client && yarn install && npm rebuild
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "./client/yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+      - restore_cache:
+          name: Restore Gatsby Public Cache
+          keys:
+            - gatsby-public-cache-{{ .Branch }}
+      - run:
+          name: Gatsby Build
+          command: yarn build
+      - save_cache:
+          name: Save Gatsby Public Cache
+          key: gatsby-public-cache-{{ .Branch }}
+          paths:
+            - ~/.cache/public
+      - run:
+          name: Deploy - Staging
+          command: |
+            sudo apt-get update && sudo apt-get install rsync
+            ssh-keyscan citadelmedia.xyz >> ~/.ssh/known_hosts
+            rsync -chavzP --delete ./client/public/ serverpilot@citadelmedia.xyz:apps/gatsby/public/
+            ssh serverpilot@citadelmedia.xyz << EOF
+              /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 stop gatsby
+              /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 start ./apps/gatsby/public/index.js --name="gatsby"
+            EOF
