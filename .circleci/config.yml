@@ -56,7 +56,7 @@ jobs:
           paths:
             - ~/.cache/public
       - run:
-          name: Deploy - Staging
+          name: Deploy - Production
           command: |
             sudo apt-get update && sudo apt-get install rsync
             ssh-keyscan citadelmedia.xyz >> ~/.ssh/known_hosts
