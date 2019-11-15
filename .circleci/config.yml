@@ -60,7 +60,7 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install rsync
             ssh-keyscan citadelmedia.xyz >> ~/.ssh/known_hosts
-            rsync -chavzP -R --delete ./.htaccess ./index.js ./node_modules ./client/public serverpilot@citadelmedia.xyz:apps/gatsby/public/
+            rsync -chavzPR --delete ./.htaccess ./index.js ./node_modules ./client/public serverpilot@citadelmedia.xyz:apps/gatsby/public/
             ssh serverpilot@citadelmedia.xyz << EOF
               /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 stop gatsby
               /srv/users/serverpilot/.nvm/versions/node/v10.17.0/bin/pm2 start ./apps/gatsby/public/index.js --name="gatsby"
